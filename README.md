@@ -1,4 +1,4 @@
-# POLKA
+# POLKA (basic)
 
 Political Prediction Model
 
