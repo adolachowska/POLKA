@@ -13,7 +13,7 @@ Sources
 2. 
 
 3. GDP
-  World Bank Data
-  link- https://data.worldbank.org/indicator/NY.GDP.MKTP.CD
-  time Period: 1960 - 2024
-  format: csv
+  - World Bank Data
+  - link- https://data.worldbank.org/indicator/NY.GDP.MKTP.CD
+  - time Period: 1960 - 2024
+  - format: csv
