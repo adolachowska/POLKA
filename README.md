@@ -18,3 +18,9 @@ Sources
   - link- https://data.worldbank.org/indicator/NY.GDP.MKTP.CD
   - time Period: 1960 - 2024
   - format: csv
+  - 
+4. Political Stability and Absence of Violence
+  - World Bank Data
+  - link - #https://data.worldbank.org/indicator/PV.PER.RNK
+  - time Period: 1996 - 2023
+  - format: csv
