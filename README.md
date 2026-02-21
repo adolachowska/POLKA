@@ -1,28 +1,28 @@
 <h1>Political Stability & Economic Indicators Predictor</h1>
 
-Projekt analityczno-inżynieryjny integrujący analizę danych (Data Science), tworzenie interfejsów API (Backend) oraz uczenie maszynowe (Machine Learning) w celu przewidywania wskaźników stabilności politycznej i gospodarczej państw.
+An analytical and engineering project integrating data analysis (Data Science), API development (Backend), and Machine Learning to predict the political and economic stability indicators of countries.
 
-Architektura Systemu (Data Pipeline)
+**System Architecture (Data Pipeline)**
 
-Projekt został zaprojektowany w oparciu o zautomatyzowany przepływ danych:
+The project was designed around an automated data flow:
 
-1. Data Collection & Cleaning: Pobieranie surowych danych z 8 różnych źródeł (m.in. wskaźniki PKB, wolności prasy, korupcji).
-   - Czyszczenie, ujednolicanie i łączenie danych (Data Merging) przy użyciu biblioteki `pandas` (wykorzystanie `reduce` i `pd.merge` typu outer join).
-2. Backend & Data Storage (FastAPI + SQL):Zautomatyzowany "Robot" w Pythonie dzieli wyczyszczone dane i wysyła je via HTTP (POST) do autorskiego API.
-   - API wylicza autorski wskaźnik `p` (średnia ze wskaźników bazowych), tworzy kopię zapasową w chmurze/Data Lake (Azurite), a następnie ładuje dane do relacyjnej bazy SQL.
-3. Machine Learning Model: Skrypt ML pobiera zawsze najświeższe dane bezpośrednio z bazy SQL za pomocą zapytań API (GET), z pominięciem lokalnych plików CSV.
-   - Konwersja formatu JSON na wektory i macierze NumPy gotowe do uczenia modelu.
+1. **Data Collection & Cleaning**: Fetching raw data from 8 different sources (including GDP, press freedom, and corruption indicators).
+   - Cleaning, standardizing, and combining data (Data Merging) using the `pandas` library (utilizing `reduce` and outer join `pd.merge`).
+2. **Backend & Data Storage (FastAPI + SQL)**: An automated Python "Robot" batches the cleaned data and sends it via HTTP (POST) to a custom API.
+   - The API calculates a custom `p` indicator (the average of the base indicators), creates a backup in the cloud/Data Lake (Azurite), and then loads the data into a relational SQL database.
+3. **Machine Learning Model**: The ML script always fetches the latest data directly from the SQL database using API requests (GET), bypassing local CSV files.
+   - Conversion of the JSON format into NumPy vectors and matrices ready for model training.
 
-**Technologie (Tech Stack)**
-Język: Python 3.x
-Data Processing: Pandas, NumPy, functools
-Backend:F astAPI, Uvicorn, Pydantic
-Baza Danych / Storage: SQL (np. SQLite/PostgreSQL), Azure Blob Storage (Azurite)
-Machine Learning: Scikit-Learn / Statsmodels 🔴 (w trakcie wyboru modelu predykcji) 🔴
+**Technologies (Tech Stack)**
+* Language: Python 3.x
+* Data Processing: Pandas, NumPy, functools
+* Backend: FastAPI, Uvicorn, Pydantic
+* Database / Storage: SQL (e.g., SQLite/PostgreSQL), Azure Blob Storage (Azurite)
+* Machine Learning: Scikit-Learn / Statsmodels 🔴 *(currently selecting the prediction model)* 🔴
 
-**Jak uruchomić projekt lokalnie?**
+**How to run the project locally?**
 
-1. Uruchomienie serwera API
-W terminalu przejdź do folderu z plikiem `main.py` i uruchom serwer lokalny:
+1. **Starting the API server**
+In the terminal, navigate to the folder containing the `main.py` file and run the local server:
 ```bash
 python -m uvicorn main:app --reload
