@@ -26,3 +26,21 @@ The project was designed around an automated data flow:
 In the terminal, navigate to the folder containing the `main.py` file and run the local server:
 ```bash
 python -m uvicorn main:app --reload
+
+The API will be available at: `http://127.0.0.1:8000`. Interactive Swagger documentation can be found at `/docs`.
+
+2. **Data Ingestion**
+Open the `data_analysis.ipynb` notebook and run all cells. 
+At the end, the script will automatically connect to the API and send the cleaned historical data for all countries, loading it into the SQL database.
+
+3. **Running the prediction model**
+Run the prediction script (e.g., `prediction_model.ipynb` or an ML script). The script will fetch the integrated data from the API (the `/countries` endpoint) and start training the model.
+
+**Repository Structure**
+* `data_analysis.ipynb` - Data cleaning scripts (EDA).
+* `api_download.ipynb` - Automated robot sending data to the API.
+* `main.py` - Main FastAPI server file.
+* `sql.py` - SQL database model definitions (SQLAlchemy).
+* `blob_service.py` - Local data upload.
+* `setup.py` - Creating local server (Azurite).
+
