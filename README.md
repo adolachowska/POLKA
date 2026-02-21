@@ -43,4 +43,5 @@ Run the prediction script (e.g., `prediction_model.ipynb` or an ML script). The 
 * `sql.py` - SQL database model definitions (SQLAlchemy).
 * `blob_service.py` - Local data upload.
 * `setup.py` - Creating local server (Azurite).
+* `ml.py` - *(currently selecting the prediction model)* 🔴
 
