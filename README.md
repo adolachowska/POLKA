@@ -13,7 +13,7 @@ Projekt został zaprojektowany w oparciu o zautomatyzowany przepływ danych:
 3. Machine Learning Model: Skrypt ML pobiera zawsze najświeższe dane bezpośrednio z bazy SQL za pomocą zapytań API (GET), z pominięciem lokalnych plików CSV.
    - Konwersja formatu JSON na wektory i macierze NumPy gotowe do uczenia modelu.
 
-</h2>**Technologie (Tech Stack)**</h2>
+**Technologie (Tech Stack)**
 Język: Python 3.x
 Data Processing: Pandas, NumPy, functools
 Backend:F astAPI, Uvicorn, Pydantic
