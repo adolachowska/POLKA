@@ -18,8 +18,7 @@ Język: Python 3.x
 Data Processing: Pandas, NumPy, functools
 Backend:F astAPI, Uvicorn, Pydantic
 Baza Danych / Storage: SQL (np. SQLite/PostgreSQL), Azure Blob Storage (Azurite)
-Machine Learning: Scikit-Learn / Statsmodels 
-+(w trakcie wyboru modelu predykcji)
+Machine Learning: Scikit-Learn / Statsmodels 🔴 (w trakcie wyboru modelu predykcji) 🔴
 
 **Jak uruchomić projekt lokalnie?**
 
