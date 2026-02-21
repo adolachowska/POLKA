@@ -1,4 +1,4 @@
-<h1>**Political Stability & Economic Indicators Predictor**<h1>
+<h1>Political Stability & Economic Indicators Predictor</h1>
 
 Projekt analityczno-inżynieryjny integrujący analizę danych (Data Science), tworzenie interfejsów API (Backend) oraz uczenie maszynowe (Machine Learning) w celu przewidywania wskaźników stabilności politycznej i gospodarczej państw.
 
@@ -18,7 +18,8 @@ Język: Python 3.x
 Data Processing: Pandas, NumPy, functools
 Backend:F astAPI, Uvicorn, Pydantic
 Baza Danych / Storage: SQL (np. SQLite/PostgreSQL), Azure Blob Storage (Azurite)
-Machine Learning: Scikit-Learn / Statsmodels *(w trakcie wyboru modelu predykcji)*
+Machine Learning: Scikit-Learn / Statsmodels 
++(w trakcie wyboru modelu predykcji)
 
 **Jak uruchomić projekt lokalnie?**
 
