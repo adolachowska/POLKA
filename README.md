@@ -1,4 +1,4 @@
-##**Political Stability & Economic Indicators Predictor**
+<h1>**Political Stability & Economic Indicators Predictor**<h1>
 
 Projekt analityczno-inżynieryjny integrujący analizę danych (Data Science), tworzenie interfejsów API (Backend) oraz uczenie maszynowe (Machine Learning) w celu przewidywania wskaźników stabilności politycznej i gospodarczej państw.
 
