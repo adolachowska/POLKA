@@ -37,8 +37,8 @@ At the end, the script will automatically connect to the API and send the cleane
 Run the prediction script (e.g., `prediction_model.ipynb` or an ML script). The script will fetch the integrated data from the API (the `/countries` endpoint) and start training the model.
 
 Repository Structure
-`data_analysis.ipynb` - Data cleaning scripts (EDA).
-`api_download.ipynb` - Automated robot sending data to the API.
+`data_analysis.py` - Data cleaning scripts (EDA).
+`api_download.py` - Automated robot sending data to the API.
 `main.py` - Main FastAPI server file.
 `sql.py` - SQL database model definitions (SQLAlchemy).
 `blob_service.py` - Local data upload.
