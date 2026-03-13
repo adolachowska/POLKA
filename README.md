@@ -1,4 +1,4 @@
-<h1>Political Stability & Economic Indicators Predictor</h1>
+<h1>Hybrid Early Warning System for Political Risk</h1>
 
 An analytical and engineering project integrating data analysis (Data Science), API development (Backend), and Machine Learning to predict the political and economic stability indicators of countries.
 
