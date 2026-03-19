@@ -215,14 +215,12 @@ full = indicators_csv
 
 print(indicators_csv.columns.tolist())
 
-"""
-#3. TO API
-import requests #wysyłanie zapytań do api
-import io #pamięć
+import requests
+import io
 
 BASE_URL = "http://127.0.0.1:8000"
 
-# Lista kolumn, których oczekuje API (już z poprawnymi nazwami!)
+
 api_columns = [
     'year',
     'press_free',
@@ -281,5 +279,3 @@ for country_name, country_data in indicators_csv.groupby('Country'):
 # print(free_id.shape)
 # print(free_id.columns.tolist())
 # print(columns.tolist())
-
-"""
