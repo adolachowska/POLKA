@@ -4,13 +4,13 @@ import pandas as pd
 BASE_URL = "http://127.0.0.1:8000"
 
 print("Downloading API")
-#sprawdzamy liste krajów
+
 try:
     response_list = requests.get(f"{BASE_URL}/countries")
     if response_list.status_code != 200:
         raise Exception(f"Download failed: {response_list.status_code}")
 
-    countries_list = response_list.json()  #słownik lista
+    countries_list = response_list.json()
     print(f"Countries list: {len(countries_list)}")
 
 except Exception as e:
@@ -25,7 +25,7 @@ for item in countries_list:
     get_data = requests.get(f"{BASE_URL}/countries/{country_name}")
 
     if get_data.status_code == 200:
-        details = get_data.json() #pobieramy info
+        details = get_data.json()
 
         if 'data' in details and details['data']:
             df_temp = pd.DataFrame(details['data'])
@@ -34,7 +34,6 @@ for item in countries_list:
     else:
         print(f"Failed download for: {country_name}")
 
-#z listy do jednej bazy danych
 if all_data_frames:
     full_df = pd.concat(all_data_frames, ignore_index=True)
 
@@ -43,7 +42,6 @@ if all_data_frames:
     full_df = full_df.sort_values(by=['Country', 'year']).reset_index(drop=True)
 
     print(f"Downloaded {len(full_df)} data.")
-    #print(full_df.head())
 
 else:
     print("No files downloaded")

@@ -7,22 +7,22 @@ from io import StringIO
 import numpy as np
 import pandas as pd
 
-#importy
+
 from sql import SessionLocal, CountryDB, YearDataDB
 from blob_service import upload_file_to_blob
 
 app = FastAPI(title="POLKA – Political System Forecast API (Azure SQL Edition)")
 
-# sesja bazy danych (otwrcie i zamknięcie)
+
 def get_db():
-    db = SessionLocal() #import sql
+    db = SessionLocal()
     try:
-        yield db #wejście do biblioteki
+        yield db
     finally:
         db.close()
 
 
-#pydantic Models
+
 class PoliticalIndicators(BaseModel):
     press_free: float
     freedom_index: float
@@ -44,19 +44,12 @@ class CountryCreate(BaseModel):
     name: str
 
 
-# funkcje przeliczanie
-
 def recalculate_metrics(db: Session, country_id: int):
 
-    #dane - sesja - sql i pansa - liczy p/t - sql aktualizacja
-
-    # dane z bazy do DataFrame, sprawdzanie rekordów bazy
-    #querry - SELECT * FROM year_data ... gdzie country_id jest jak country_id
     records = db.query(YearDataDB).filter(YearDataDB.country_id == country_id).all()
     if not records:
         return
 
-# konwersja SQL na listę słowników
     data_list = []
     for r in records:
         current_dict = {
@@ -69,7 +62,7 @@ def recalculate_metrics(db: Session, country_id: int):
 
     df = pd.DataFrame(data_list).sort_values("year")
 
-#pandas
+
     df["p_lag_1"] = df["p"].shift(1)
     df["p_lag_3"] = df["p"].shift(3)
 
@@ -78,8 +71,8 @@ def recalculate_metrics(db: Session, country_id: int):
     else:
         df["p_trend"] = np.nan
 
-#update
-    df = df.replace({np.nan: None}) #zamiana na None w SQL
+
+    df = df.replace({np.nan: None})
 
     for _, row in df.iterrows():
         db_record = next(r for r in records if r.id == row["id"])
@@ -99,9 +92,7 @@ def compute_p(indicators: PoliticalIndicators) -> float:
     ]
     return float(np.mean(values))
 
-# endpointy
 
-#dodaj kraj
 @app.post("/countries")
 def create_country(payload: CountryCreate, db: Session = Depends(get_db)):
     existing = db.query(CountryDB).filter(CountryDB.name == payload.name).first()
@@ -113,43 +104,39 @@ def create_country(payload: CountryCreate, db: Session = Depends(get_db)):
     db.commit()
     return {"status": "created", "country": payload.name}
 
-#dodaj rok
+
 @app.post("/countries/{name}/year")
 def add_year(name: str, payload: YearCreate, db: Session = Depends(get_db)):
     country = db.query(CountryDB).filter(CountryDB.name == name).first()
     if not country:
         raise HTTPException(status_code=404, detail="Country not found")
 
-    #czy rok już istnieje
     exists = db.query(YearDataDB).filter_by(country_id=country.id, year=payload.year).first()
     if exists:
         raise HTTPException(status_code=400, detail="Year already exists")
 
 
-    #  nowy rekord do SQL
     new_data = YearDataDB(
         country_id=country.id,
         year=payload.year,
-        **payload.indicators.dict(),  # Rozpakowanie wskaźników
+        **payload.indicators.dict(),
         p=compute_p(payload.indicators)
-        # p_lag i trend są na razie Null, policzymy je za chwilę
     )
     db.add(new_data)
     db.commit()
 
-    # Przelicz wskaźniki historyczne (Features Engineering)
     recalculate_metrics(db, country.id)
 
     return {"status": "year added", "year": payload.year}
 
-#data kraj
+
 @app.get("/countries/{name}")
 def get_country_data(name: str, db: Session = Depends(get_db)):
     country = db.query(CountryDB).filter(CountryDB.name == name).first()
     if not country:
         raise HTTPException(status_code=404, detail="Country not found")
 
-    #sortowanie po roku
+
     data = db.query(YearDataDB).filter_by(country_id=country.id).order_by(YearDataDB.year).all()
     return data
 
@@ -163,17 +150,14 @@ async def upload_csv(name: str, file: UploadFile = File(...), db: Session = Depe
     if not file.filename.endswith(".csv"):
         raise HTTPException(status_code=400, detail="Not CSV file")
 
-    #zapis do Azure Blob Storage
     file_content = await file.read()
     blob_url = await run_in_threadpool(upload_file_to_blob, file_content, file.filename)
 
-    #bajty tekst
     csv_text = file_content.decode("utf-8")
     reader = csv.DictReader(StringIO(csv_text))
 
     years_added = 0
 
-    # sprawdzenie kolumn
     required_columns = {"year", "press_free", "freedom_index", "gdp", "absence_of_violence",
                         "electoral_integrity","civil_liberties",
                         "gov_stability", "human_rights", "electoral_integrity", "system_index"}
@@ -184,7 +168,6 @@ async def upload_csv(name: str, file: UploadFile = File(...), db: Session = Depe
 
 
     for row in reader:
-        # spr błędów bez zamykania kodu
         try:
             indicators = PoliticalIndicators(
                 press_free=float(row["press_free"]),
@@ -215,12 +198,11 @@ async def upload_csv(name: str, file: UploadFile = File(...), db: Session = Depe
 
     db.commit()
 
-    #lag compute
     if years_added > 0:
         recalculate_metrics(db, country.id)
 
     return {
         "status": "csv uploaded and processed",
         "rows_added": years_added,
-        "backup_url": blob_url  # Zwracamy link do backupu w Blob Storage
+        "backup_url": blob_url
     }
