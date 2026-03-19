@@ -187,7 +187,7 @@ newest_year = eiu_id["Year"].max()
 
 print(f'Democracy Index EIU, number of countries: {country_count}, number of years: {year_count} from {oldest_year}-{newest_year}')
 
-#2. ŁĄCZENIE
+
 indicators_df = [fp_id, free_id, gdp_id, absence_of_violence_id, civil_liberties_id, cor_per_id, hum_rig_id, ele_int_id, eiu_id]
 
 for df in indicators_df:
