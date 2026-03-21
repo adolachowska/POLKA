@@ -89,6 +89,8 @@ The script will load parameters from the config file, fetch the integrated data 
 
 3. Strategic Effectiveness: Because missing a crisis is significantly more costly than a false alarm, the ultimate metric for the system is Recall (Sensitivity) for the "Crisis" class.
 
-4. Confusion Matrix: Used for visual assessment of systemic errors.
 
-5. Explainable AI (XAI): Generates Feature Importance charts to identify which macro-indicators drive model decisions.
+
+5. Confusion Matrix: Used for visual assessment of systemic errors.
+
+6. Explainable AI (XAI): Generates Feature Importance charts to identify which macro-indicators drive model decisions.
