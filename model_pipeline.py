@@ -7,6 +7,7 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error, classificat
 import matplotlib.pyplot as plt
 
 from data_analysis import full
+from api_download import full_df
 import config
 
 
@@ -135,7 +136,7 @@ def plot_feature_importance(model):
 
 if __name__ == "__main__":
 
-    X, y, df_clean = prepare_data(full)
+    X, y, df_clean = prepare_data(full_df)
 
     X_scaled_df = preprocess_features(X)
 
