@@ -4,9 +4,7 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel
 import csv
 from io import StringIO
-import numpy as np
-import pandas as pd
-
+from typing import Optional
 
 from sql import SessionLocal, CountryDB, YearDataDB
 from blob_service import upload_file_to_blob
@@ -22,17 +20,16 @@ def get_db():
         db.close()
 
 
-
 class PoliticalIndicators(BaseModel):
-    press_free: float
-    freedom_index: float
-    gdp: float
-    absence_of_violence: float
-    civil_liberties: float
-    gov_stability: float
-    human_rights: float
-    electoral_integrity: float
-    system_index: float
+    press_free: Optional[float] = None
+    freedom_index: Optional[float] = None
+    gdp: Optional[float] = None
+    absence_of_violence: Optional[float] = None
+    civil_liberties: Optional[float] = None
+    gov_stability: Optional[float] = None
+    human_rights: Optional[float] = None
+    electoral_integrity: Optional[float] = None
+    system_index: Optional[float] = None
 
 
 class YearCreate(BaseModel):
@@ -42,55 +39,6 @@ class YearCreate(BaseModel):
 
 class CountryCreate(BaseModel):
     name: str
-
-
-def recalculate_metrics(db: Session, country_id: int):
-
-    records = db.query(YearDataDB).filter(YearDataDB.country_id == country_id).all()
-    if not records:
-        return
-
-    data_list = []
-    for r in records:
-        current_dict = {
-            "id": r.id,
-            "year": r.year,
-            "p": r.p
-        }
-
-        data_list.append(current_dict)
-
-    df = pd.DataFrame(data_list).sort_values("year")
-
-
-    df["p_lag_1"] = df["p"].shift(1)
-    df["p_lag_3"] = df["p"].shift(3)
-
-    if len(df) >= 5:
-        df["p_trend"] = df["p"].rolling(5).apply(lambda x: x.iloc[-1] - x.iloc[0])
-    else:
-        df["p_trend"] = np.nan
-
-
-    df = df.replace({np.nan: None})
-
-    for _, row in df.iterrows():
-        db_record = next(r for r in records if r.id == row["id"])
-
-        db_record.p_lag_1 = row["p_lag_1"]
-        db_record.p_lag_3 = row["p_lag_3"]
-        db_record.p_trend = row["p_trend"]
-
-    db.commit()
-
-
-def compute_p(indicators: PoliticalIndicators) -> float:
-    values = [
-        indicators.press_free, indicators.freedom_index,
-        indicators.gdp, indicators.absence_of_violence, indicators.gov_stability,
-        indicators.human_rights, indicators.civil_liberties,
-    ]
-    return float(np.mean(values))
 
 
 @app.post("/countries")
@@ -105,6 +53,12 @@ def create_country(payload: CountryCreate, db: Session = Depends(get_db)):
     return {"status": "created", "country": payload.name}
 
 
+@app.get("/countries")
+def get_all_countries(db: Session = Depends(get_db)):
+    countries = db.query(CountryDB).all()
+    return [{"name": country.name} for country in countries]
+
+
 @app.post("/countries/{name}/year")
 def add_year(name: str, payload: YearCreate, db: Session = Depends(get_db)):
     country = db.query(CountryDB).filter(CountryDB.name == name).first()
@@ -115,17 +69,13 @@ def add_year(name: str, payload: YearCreate, db: Session = Depends(get_db)):
     if exists:
         raise HTTPException(status_code=400, detail="Year already exists")
 
-
     new_data = YearDataDB(
         country_id=country.id,
         year=payload.year,
-        **payload.indicators.dict(),
-        p=compute_p(payload.indicators)
+        **payload.indicators.model_dump()
     )
     db.add(new_data)
     db.commit()
-
-    recalculate_metrics(db, country.id)
 
     return {"status": "year added", "year": payload.year}
 
@@ -136,9 +86,15 @@ def get_country_data(name: str, db: Session = Depends(get_db)):
     if not country:
         raise HTTPException(status_code=404, detail="Country not found")
 
+    records = db.query(YearDataDB).filter_by(country_id=country.id).order_by(YearDataDB.year).all()
 
-    data = db.query(YearDataDB).filter_by(country_id=country.id).order_by(YearDataDB.year).all()
-    return data
+    data_list = []
+    for r in records:
+        row_dict = r.__dict__.copy()
+        row_dict.pop('_sa_instance_state', None)
+        data_list.append(row_dict)
+
+    return {"data": data_list}
 
 
 @app.post("/countries/{name}/upload-csv")
@@ -159,47 +115,60 @@ async def upload_csv(name: str, file: UploadFile = File(...), db: Session = Depe
     years_added = 0
 
     required_columns = {"year", "press_free", "freedom_index", "gdp", "absence_of_violence",
-                        "electoral_integrity","civil_liberties",
+                        "electoral_integrity", "civil_liberties",
                         "gov_stability", "human_rights", "electoral_integrity", "system_index"}
 
     for col in required_columns:
         if col not in reader.fieldnames:
             raise HTTPException(status_code=400, detail=f"Missing column: {col}")
 
-
     for row in reader:
         try:
+            # 1. BEZPIECZNE POBIERANIE ROKU
+            year_str = str(row.get("year", "")).strip()
+            # Jeśli brak roku lub rok to "nan", pomijamy całkowicie ten wiersz (jest bezużyteczny)
+            if not year_str or year_str.lower() == "nan":
+                continue
+
+                # Konwersja do float, a potem int pozwala uniknąć błędu, gdy rok to np. "2020.0"
+            year_val = int(float(year_str))
+
+            # 2. BEZPIECZNA KONWERSJA WSKAŹNIKÓW
+            def parse_val(v):
+                if v is None:
+                    return None
+                val_str = str(v).strip().lower()
+                if val_str == "" or val_str == "nan":
+                    return None
+                return float(v)
+
             indicators = PoliticalIndicators(
-                press_free=float(row["press_free"]),
-                freedom_index=float(row["freedom_index"]),
-                gdp=float(row["gdp"]),
-                absence_of_violence=float(row["absence_of_violence"]),
-                civil_liberties=float(row["civil_liberties"]),
-                gov_stability=float(row["gov_stability"]),
-                human_rights=float(row["human_rights"]),
-                electoral_integrity=float(row["electoral_integrity"]),
-                system_index=float(row["system_index"]),
+                press_free=parse_val(row.get("press_free")),
+                freedom_index=parse_val(row.get("freedom_index")),
+                gdp=parse_val(row.get("gdp")),
+                absence_of_violence=parse_val(row.get("absence_of_violence")),
+                civil_liberties=parse_val(row.get("civil_liberties")),
+                gov_stability=parse_val(row.get("gov_stability")),
+                human_rights=parse_val(row.get("human_rights")),
+                electoral_integrity=parse_val(row.get("electoral_integrity")),
+                system_index=parse_val(row.get("system_index")),
             )
-            year_val = int(row["year"])
 
             if not db.query(YearDataDB).filter_by(country_id=country.id, year=year_val).first():
                 new_row = YearDataDB(
                     country_id=country.id,
                     year=year_val,
-                    **indicators.model_dump(),
-                    p=compute_p(indicators)
+                    **indicators.model_dump()
                 )
                 db.add(new_row)
                 years_added += 1
 
-        except ValueError as e:
-            print(f"Skipping row due to error: {e}")
+        except Exception as e:
+            # Jeśli cokolwiek wybuchnie, serwer dokładnie powie nam dlaczego
+            print(f"Skipping row due to error: {e} | Row: {row}")
             continue
 
     db.commit()
-
-    if years_added > 0:
-        recalculate_metrics(db, country.id)
 
     return {
         "status": "csv uploaded and processed",

@@ -7,7 +7,7 @@ load_dotenv()
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 if not DATABASE_URL:
-    raise ValueError("Brakuje DATABASE_URL w pliku .env!")
+    raise ValueError("No DATABASE_URL in file .env!")
 
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -32,7 +32,6 @@ class YearDataDB(Base):
 
     country = relationship("CountryDB", back_populates="years")
 
-
     press_free = Column(Float)
     freedom_index = Column(Float)
     gdp = Column(Float)
@@ -43,11 +42,4 @@ class YearDataDB(Base):
     electoral_integrity = Column(Float)
     system_index = Column(Float)
 
-
-    p = Column(Float)
-    p_lag_1 = Column(Float, nullable=True)
-    p_lag_3 = Column(Float, nullable=True)
-    p_trend = Column(Float, nullable=True)
-
-
-Base.metadata.create_all(bind=engine) #połączenie z Azune, tworzenie kolumn, komenda,
+Base.metadata.create_all(bind=engine)

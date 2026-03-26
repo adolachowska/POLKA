@@ -41,10 +41,10 @@ print(f'Freedom Index, number of countries: {country_count}, number of years: {y
 gdp_id = pd.read_csv('data/world_gdp_data.csv', encoding='cp1250')
 gdp_id = gdp_id.rename({'Annual GDP growth (percent change)': 'gdp'})
 gdp_id = gdp_id.melt(
-    id_vars=['country_name'],        # kolumna, która ma pozostać jako identyfikator
-    value_vars=[str(y) for y in range(1980, 2025)],  # kolumny lat jako wartości
-    var_name='Year',                  # nowa kolumna z nazwą roku
-    value_name='gdp'                 # nowa kolumna z wartościami GDP
+    id_vars=['country_name'],
+    value_vars=[str(y) for y in range(1980, 2025)],
+    var_name='Year',
+    value_name='gdp'
 )
 gdp_id = gdp_id.rename(columns={'country_name': 'Country'})
 
@@ -219,6 +219,8 @@ import io
 
 BASE_URL = "http://127.0.0.1:8000"
 
+indicators_csv = indicators_csv.rename(columns={'Year': 'year'})
+
 api_columns = [
     'year',
     'press_free',
@@ -228,7 +230,7 @@ api_columns = [
     'civil_liberties',
     'gov_stability',
     'human_rights',
-    'electoral_integrity'
+    'electoral_integrity',
     'system_index'
 ]
 
@@ -266,4 +268,3 @@ for country_name, country_data in indicators_csv.groupby('Country'):
 
     except Exception as e:
         print(f"❌ {country_name}: Błąd połączenia: {e}")
-

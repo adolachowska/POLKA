@@ -7,13 +7,13 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error, classificat
 import matplotlib.pyplot as plt
 
 from data_analysis import full
-from api_download import full_df
+from api_download import fetch_full_dataframe
 import config
 
 
 def prepare_data(df):
 
-    df = df.sort_values(by=['Country', 'Year'])
+    df = df.sort_values(by=['Country', 'year'])
     df[config.TARGET_NEXT_YEAR] = df.groupby('Country')[config.TARGET_BASE].shift(-1)
 
     cols_to_check = config.FEATURES + [config.TARGET_NEXT_YEAR]
@@ -136,17 +136,22 @@ def plot_feature_importance(model):
 
 if __name__ == "__main__":
 
+    full_df = fetch_full_dataframe()
+
+    if full_df.empty:
+        raise ValueError("Empty. Check API connection")
+
     X, y, df_clean = prepare_data(full_df)
 
     X_scaled_df = preprocess_features(X)
 
     year_limit = 2019
 
-    X_train = X_scaled_df[df_clean['Year'] < year_limit]
-    y_train = y[df_clean['Year'] < year_limit]
+    X_train = X_scaled_df[df_clean['year'] < year_limit]
+    y_train = y[df_clean['year'] < year_limit]
 
-    X_test = X_scaled_df[df_clean['Year'] >= year_limit]
-    y_test = y[df_clean['Year'] >= year_limit]
+    X_test = X_scaled_df[df_clean['year'] >= year_limit]
+    y_test = y[df_clean['year'] >= year_limit]
 
     y_baseline = df_clean.loc[X_test.index, config.TARGET_BASE]
 
