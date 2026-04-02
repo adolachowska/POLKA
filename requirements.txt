@@ -4,3 +4,4 @@ pandas
 pyodbc
 sqlalchemy
 python-dotenv
+pydantic
