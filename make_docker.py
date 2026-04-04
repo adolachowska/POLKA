@@ -4,7 +4,6 @@ dockerignore_content = """__pycache__
 *.pyc
 .venv
 venv/
-.env
 *.db
 *.sqlite3
 .git
@@ -48,7 +47,7 @@ services:
     depends_on:
       - azurite
     environment:
-      - AZURE_STORAGE_CONNECTION_STRING=DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xVDveGuAfI35c+tePNoHLWmxZYzE5LFrSgxW8cenF3SRf5OfcO9P247cfcpathxvL3GV8eVw==;BlobEndpoint=http://azurite:10000/devstoreaccount1;
+      - DATABASE_URL=mssql+pyodbc://sa:Polka123!@host.docker.internal:1433/polka_db?driver=ODBC+Driver+18+for+SQL+Server&Encrypt=yes&TrustServerCertificate=yes
 
 volumes:
   azurite_data:
