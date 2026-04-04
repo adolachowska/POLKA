@@ -64,6 +64,7 @@ with open("docker-compose.yml", "w", encoding="utf-8") as f:
 
 print("✅ Pliki .dockerignore, Dockerfile i docker-compose.yml zostały utworzone pomyślnie!")
 
+
 import os
 print("Docker installing")
 os.system("docker-compose up --build")
